@@ -1,7 +1,7 @@
 // routes/profileRoutes.js
 const express = require("express");
 const router = express.Router();
-const verifyToken = require("../middleware/auth");
+const verifyToken = require("../middleware/authRoutes");
 const db = require("../db/queries");
 
 // GET /profile - Get user profile (protected)
