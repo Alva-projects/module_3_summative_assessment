@@ -40,17 +40,17 @@ app.get("/", (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`\n📝 Public Endpoints:`);
+  console.log(`   Server running on http://localhost:${PORT}`);
+  console.log(`\n Public Endpoints:`);
   console.log(`   GET    http://localhost:${PORT}/gyms`);
   console.log(`   GET    http://localhost:${PORT}/gyms/:id`);
-  console.log(`\n🔒 Protected Endpoints (need token):`);
+  console.log(`\n Protected Endpoints (need token):`);
   console.log(`   POST   http://localhost:${PORT}/gyms`);
   console.log(`   POST   http://localhost:${PORT}/gyms/:id/reviews`);
   console.log(`   GET    http://localhost:${PORT}/profile`);
   console.log(`   GET    http://localhost:${PORT}/profile/gyms`);
   console.log(`   GET    http://localhost:${PORT}/profile/reviews`);
-  console.log(`\n🔑 Auth Endpoints:`);
+  console.log(`\n Auth Endpoints:`);
   console.log(`   POST   http://localhost:${PORT}/auth/login`);
   console.log(`   GET    http://localhost:${PORT}/auth/verify`);
 });
