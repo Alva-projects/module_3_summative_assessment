@@ -44,11 +44,4 @@ const verifyToken = async (req, res, next) => {
   }
 };
 
-router.get("/gyms/:id", verifyToken, (req, res) => {
-  res.json({
-    message: "Access granted",
-    user: req.user,
-  });
-});
-
 module.exports = router;

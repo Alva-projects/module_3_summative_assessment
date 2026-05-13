@@ -148,6 +148,13 @@ router.post("/:id/reviews", verifyToken, async (req, res) => {
   }
 });
 
+router.get("/gyms/:id", verifyToken, (req, res) => {
+  res.json({
+    message: "Access granted",
+    user: req.user,
+  });
+});
+
 module.exports = router;
 
 // routes/gymRoutes.js
