@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GymReviews</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f13;
+      --surface: #1a1a22;
+      --surface2: #23232f;
+      --border: #2e2e3d;
+      --accent: #6c63ff;
+      --accent-hover: #5a52e0;
+      --accent2: #ff6584;
+      --text: #e8e8f0;
+      --text-muted: #8888a0;
+      --success: #4caf7d;
+      --warning: #f0a500;
+      --danger: #e05252;
+      --radius: 10px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.5);
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* NAV */
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-logo {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+    }
+
+    .nav-logo span { color: var(--accent2); }
+
+    .nav-links { display: flex; gap: 0.5rem; align-items: center; }
+
+    .nav-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 0.4rem 1rem;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.15s;
+    }
+
+    .nav-btn:hover { color: var(--text); border-color: var(--accent); }
+    .nav-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .nav-btn.primary:hover { background: var(--accent-hover); }
+
+    #nav-user {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-right: 0.5rem;
+    }
+
+    /* MAIN */
+    main {
+      flex: 1;
+      max-width: 1100px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* VIEWS */
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* HERO */
+    .hero {
+      text-align: center;
+      padding: 3rem 0 2rem;
+    }
+
+    .hero h1 {
+      font-size: 2.6rem;
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 2rem; }
+
+    /* CARDS */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .gym-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.2rem;
+      margin-top: 1.5rem;
+    }
+
+    .gym-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.4rem;
+      cursor: pointer;
+      transition: border-color 0.15s, transform 0.15s;
+    }
+
+    .gym-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+    .gym-card h3 { font-size: 1.1rem; margin-bottom: 0.3rem; }
+    .gym-card .location { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.7rem; }
+
+    .gym-card .desc {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-bottom: 0.9rem;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .gym-meta { display: flex; gap: 1rem; align-items: center; }
+
+    .stars { color: var(--warning); font-size: 1rem; letter-spacing: 1px; }
+    .rating-num { font-weight: 700; font-size: 0.95rem; }
+    .review-count { color: var(--text-muted); font-size: 0.82rem; }
+
+    /* SECTION HEADER */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .section-header h2 { font-size: 1.4rem; }
+
+    /* BUTTON */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.55rem 1.2rem;
+      border-radius: var(--radius);
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: background 0.15s, opacity 0.15s;
+    }
+
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-outline {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* FORMS */
+    .form-group { margin-bottom: 1.1rem; }
+
+    label {
+      display: block;
+      margin-bottom: 0.35rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 0.65rem 0.9rem;
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+    textarea { resize: vertical; min-height: 80px; }
+
+    /* MODAL */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    .modal h2 { font-size: 1.3rem; margin-bottom: 1.5rem; }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.3rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .modal-close:hover { color: var(--text); }
+
+    .modal-tabs { display: flex; gap: 0; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+
+    .modal-tab {
+      flex: 1;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.6rem;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-bottom: 2px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .modal-tab.active { color: var(--accent); border-color: var(--accent); }
+
+    /* GYM DETAIL */
+    .gym-detail-header {
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .gym-detail-header h2 { font-size: 1.8rem; }
+    .gym-detail-header .location { color: var(--text-muted); margin-top: 0.3rem; }
+
+    .gym-detail-header .desc {
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      line-height: 1.6;
+    }
+
+    .big-rating {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.6rem;
+    }
+
+    .big-rating .stars { font-size: 1.2rem; }
+    .big-rating .rating-num { font-size: 1.5rem; font-weight: 800; }
+    .big-rating .review-count { color: var(--text-muted); }
+
+    /* REVIEWS */
+    .review-list { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; }
+
+    .review-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.1rem;
+    }
+
+    .review-item .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .reviewer { font-weight: 600; font-size: 0.9rem; }
+    .review-date { color: var(--text-muted); font-size: 0.8rem; }
+    .review-comment { color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; margin-top: 0.4rem; }
+
+    /* RATING INPUT */
+    .star-input { display: flex; gap: 0.3rem; margin-top: 0.3rem; }
+
+    .star-btn {
+      background: none;
+      border: none;
+      font-size: 1.6rem;
+      cursor: pointer;
+      color: var(--border);
+      transition: color 0.1s, transform 0.1s;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .star-btn.active, .star-btn:hover { color: var(--warning); transform: scale(1.1); }
+
+    /* PROFILE */
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      margin-bottom: 2rem;
+    }
+
+    .avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .profile-name { font-size: 1.3rem; font-weight: 700; }
+    .profile-email { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.15rem; }
+
+    .stats-row {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .stat-card {
+      flex: 1;
+      min-width: 120px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.2rem;
+      text-align: center;
+    }
+
+    .stat-card .stat-num { font-size: 2rem; font-weight: 800; color: var(--accent); }
+    .stat-card .stat-label { color: var(--text-muted); font-size: 0.8rem; margin-top: 0.2rem; }
+
+    .profile-section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.8rem; margin-top: 1.5rem; }
+
+    /* TOAST */
+    #toast-container {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .toast {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.8rem 1.2rem;
+      font-size: 0.9rem;
+      box-shadow: var(--shadow);
+      animation: slideIn 0.2s ease;
+      max-width: 320px;
+    }
+
+    .toast.success { border-left: 3px solid var(--success); }
+    .toast.error { border-left: 3px solid var(--danger); }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* EMPTY */
+    .empty {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-muted);
+    }
+
+    .empty-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .empty p { margin-bottom: 1rem; }
+
+    /* LOADER */
+    .loader {
+      display: flex;
+      justify-content: center;
+      padding: 3rem;
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* BACK BTN */
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+      padding: 0;
+      transition: color 0.15s;
+    }
+
+    .back-btn:hover { color: var(--text); }
+
+    /* ERROR */
+    .alert {
+      padding: 0.8rem 1rem;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      margin-bottom: 1rem;
+    }
+
+    .alert-error { background: rgba(224,82,82,0.15); border: 1px solid var(--danger); color: #ff8c8c; }
+    .alert-success { background: rgba(76,175,125,0.15); border: 1px solid var(--success); color: #7ee0a8; }
+
+    @media (max-width: 600px) {
+      .hero h1 { font-size: 1.8rem; }
+      main { padding: 1.2rem 1rem; }
+      nav { padding: 0 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Gym<span>Reviews</span></div>
+  <div class="nav-links">
+    <span id="nav-user"></span>
+    <button class="nav-btn" id="btn-gyms-nav" onclick="showView('gyms')">Gyms</button>
+    <button class="nav-btn" id="btn-profile-nav" onclick="showView('profile')" style="display:none">Profile</button>
+    <button class="nav-btn primary" id="btn-auth-nav" onclick="openAuthModal()">Sign In</button>
+    <button class="nav-btn" id="btn-signout-nav" onclick="signOut()" style="display:none">Sign Out</button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main>
+
+  <!-- GYMS VIEW -->
+  <div class="view active" id="view-gyms">
+    <div class="hero">
+      <h1>Find Your Perfect Gym</h1>
+      <p>Browse real reviews from real members</p>
+    </div>
+    <div class="section-header">
+      <h2>All Gyms</h2>
+      <button class="btn btn-primary" id="btn-add-gym" onclick="openAddGymModal()" style="display:none">+ Add Gym</button>
+    </div>
+    <div id="gyms-list">
+      <div class="loader"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- GYM DETAIL VIEW -->
+  <div class="view" id="view-gym-detail">
+    <button class="back-btn" onclick="showView('gyms')">&#8592; Back to Gyms</button>
+    <div id="gym-detail-content">
+      <div class="loader"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- PROFILE VIEW -->
+  <div class="view" id="view-profile">
+    <div id="profile-content">
+      <div class="loader"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- AUTH MODAL -->
+<div class="modal-backdrop" id="modal-auth">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-auth')">&#10005;</button>
+    <h2>Sign In</h2>
+    <p style="color:var(--text-muted);margin-bottom:1.5rem;font-size:0.9rem">Sign in to add gyms and write reviews</p>
+    <div id="signin-error"></div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;gap:.6rem" id="btn-google-signin" onclick="handleGoogleSignIn()">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+        <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+        <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+        <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+      </svg>
+      Continue with Google
+    </button>
+  </div>
+</div>
+
+<!-- ADD GYM MODAL -->
+<div class="modal-backdrop" id="modal-add-gym">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-add-gym')">&#10005;</button>
+    <h2>Add a Gym</h2>
+    <div id="add-gym-error"></div>
+    <div class="form-group">
+      <label>Name *</label>
+      <input type="text" id="gym-name" placeholder="e.g. Iron Paradise" />
+    </div>
+    <div class="form-group">
+      <label>Location *</label>
+      <input type="text" id="gym-location" placeholder="e.g. Stockholm, Sweden" />
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="gym-description" placeholder="Tell people about this gym..."></textarea>
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="handleAddGym()">Add Gym</button>
+  </div>
+</div>
+
+<!-- ADD REVIEW MODAL -->
+<div class="modal-backdrop" id="modal-add-review">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-add-review')">&#10005;</button>
+    <h2>Write a Review</h2>
+    <div id="add-review-error"></div>
+    <div class="form-group">
+      <label>Rating *</label>
+      <div class="star-input" id="star-input">
+        <button class="star-btn" data-value="1" onclick="setRating(1)">&#9733;</button>
+        <button class="star-btn" data-value="2" onclick="setRating(2)">&#9733;</button>
+        <button class="star-btn" data-value="3" onclick="setRating(3)">&#9733;</button>
+        <button class="star-btn" data-value="4" onclick="setRating(4)">&#9733;</button>
+        <button class="star-btn" data-value="5" onclick="setRating(5)">&#9733;</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Comment</label>
+      <textarea id="review-comment" placeholder="Share your experience..."></textarea>
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="handleAddReview()">Submit Review</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast-container"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script>
+  const API = 'http://localhost:3000';
+
+  let state = {
+    token: localStorage.getItem('token') || null,
+    user: JSON.parse(localStorage.getItem('user') || 'null'),
+    currentGymId: null,
+    selectedRating: 0,
+  };
+
+  // ── UTILS ────────────────────────────────────────────────────────────────
+
+  function starsHtml(rating) {
+    const n = Math.round(rating || 0);
+    return '&#9733;'.repeat(n) + '&#9734;'.repeat(5 - n);
+  }
+
+  function formatDate(iso) {
+    if (!iso) return '';
+    return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function toast(msg, type = 'success') {
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.textContent = msg;
+    document.getElementById('toast-container').appendChild(el);
+    setTimeout(() => el.remove(), 3500);
+  }
+
+  function showError(id, msg) {
+    const el = document.getElementById(id);
+    el.innerHTML = msg ? `<div class="alert alert-error">${msg}</div>` : '';
+  }
+
+  function setLoading(btnId, loading) {
+    const btn = document.getElementById(btnId);
+    if (btn) btn.disabled = loading;
+  }
+
+  async function apiFetch(path, opts = {}) {
+    const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+    if (state.token) headers['Authorization'] = `Bearer ${state.token}`;
+    const res = await fetch(`${API}${path}`, { ...opts, headers });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || data.message || `HTTP ${res.status}`);
+    return data;
+  }
+
+  // ── VIEWS ────────────────────────────────────────────────────────────────
+
+  function showView(name) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById(`view-${name}`).classList.add('active');
+    if (name === 'gyms') loadGyms();
+    if (name === 'profile') loadProfile();
+    window.scrollTo(0, 0);
+  }
+
+  // ── AUTH ─────────────────────────────────────────────────────────────────
+
+  function updateNav() {
+    const authed = !!state.token;
+    document.getElementById('btn-auth-nav').style.display = authed ? 'none' : '';
+    document.getElementById('btn-signout-nav').style.display = authed ? '' : 'none';
+    document.getElementById('btn-profile-nav').style.display = authed ? '' : 'none';
+    document.getElementById('btn-add-gym').style.display = authed ? '' : 'none';
+    document.getElementById('nav-user').textContent = state.user ? (state.user.displayName || state.user.email) : '';
+  }
+
+  function openAuthModal() {
+    document.getElementById('modal-auth').classList.add('open');
+  }
+
+  async function handleGoogleSignIn() {
+    await configReady;
+    setLoading('btn-google-signin', true);
+    showError('signin-error', '');
+    try {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      const result = await firebase.auth().signInWithPopup(provider);
+      const idToken = await result.user.getIdToken();
+      state.token = idToken;
+      state.user = { email: result.user.email, displayName: result.user.displayName };
+      localStorage.setItem('token', idToken);
+      localStorage.setItem('user', JSON.stringify(state.user));
+      closeModal('modal-auth');
+      updateNav();
+      toast('Signed in with Google!');
+    } catch (e) {
+      showError('signin-error', e.message);
+    } finally {
+      setLoading('btn-google-signin', false);
+    }
+  }
+
+  function signOut() {
+    firebase.auth().signOut().catch(() => {});
+    state.token = null;
+    state.user = null;
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    updateNav();
+    showView('gyms');
+    toast('Signed out.');
+  }
+
+  // ── GYMS ─────────────────────────────────────────────────────────────────
+
+  async function loadGyms() {
+    const container = document.getElementById('gyms-list');
+    container.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
+    try {
+      const data = await apiFetch('/gyms');
+      const gyms = Array.isArray(data) ? data : (data.gyms || []);
+      if (!gyms.length) {
+        container.innerHTML = `
+          <div class="empty">
+            <div class="empty-icon">&#127947;</div>
+            <p>No gyms yet. Be the first to add one!</p>
+          </div>`;
+        return;
+      }
+      container.innerHTML = `<div class="gym-grid">${gyms.map(gymCard).join('')}</div>`;
+    } catch (e) {
+      container.innerHTML = `<div class="empty"><p>Failed to load gyms: ${e.message}</p></div>`;
+    }
+  }
+
+  function gymCard(gym) {
+    const avg = parseFloat(gym.average_rating) || 0;
+    const count = gym.review_count || 0;
+    return `
+      <div class="gym-card" onclick="openGym('${gym.id}')">
+        <h3>${escHtml(gym.name)}</h3>
+        <div class="location">&#128205; ${escHtml(gym.location || 'Location unknown')}</div>
+        ${gym.description ? `<div class="desc">${escHtml(gym.description)}</div>` : ''}
+        <div class="gym-meta">
+          <span class="stars">${starsHtml(avg)}</span>
+          <span class="rating-num">${avg ? avg.toFixed(1) : '—'}</span>
+          <span class="review-count">${count} review${count !== 1 ? 's' : ''}</span>
+        </div>
+      </div>`;
+  }
+
+  async function openGym(id) {
+    state.currentGymId = id;
+    showView('gym-detail');
+    const container = document.getElementById('gym-detail-content');
+    container.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
+    try {
+      const data = await apiFetch(`/gyms/${id}`);
+      const gym = data.gym || data;
+      const reviews = data.reviews || [];
+      const avg = parseFloat(data.average_rating || gym.average_rating) || 0;
+      const count = data.review_count || reviews.length;
+
+      container.innerHTML = `
+        <div class="gym-detail-header">
+          <div>
+            <h2>${escHtml(gym.name)}</h2>
+            <div class="location">&#128205; ${escHtml(gym.location || 'Location unknown')}</div>
+            ${gym.description ? `<div class="desc">${escHtml(gym.description)}</div>` : ''}
+            <div class="big-rating">
+              <span class="stars">${starsHtml(avg)}</span>
+              <span class="rating-num">${avg ? avg.toFixed(1) : '—'}</span>
+              <span class="review-count">&nbsp;(${count} review${count !== 1 ? 's' : ''})</span>
+            </div>
+          </div>
+          ${state.token ? `<button class="btn btn-primary" onclick="openAddReviewModal()">+ Write Review</button>` : ''}
+        </div>
+
+        <h3 style="margin-bottom:1rem">Reviews</h3>
+        ${reviews.length
+          ? `<div class="review-list">${reviews.map(reviewItem).join('')}</div>`
+          : `<div class="empty"><div class="empty-icon">&#128172;</div><p>No reviews yet. ${state.token ? 'Be the first!' : 'Sign in to leave a review.'}</p></div>`
+        }`;
+    } catch (e) {
+      container.innerHTML = `<div class="empty"><p>Failed to load gym: ${e.message}</p></div>`;
+    }
+  }
+
+  function reviewItem(r) {
+    return `
+      <div class="review-item">
+        <div class="review-header">
+          <span class="reviewer">&#128100; ${escHtml(r.user_email || r.display_name || 'Member')}</span>
+          <span class="review-date">${formatDate(r.created_at)}</span>
+        </div>
+        <div class="stars">${starsHtml(r.rating)}</div>
+        ${r.comment ? `<div class="review-comment">${escHtml(r.comment)}</div>` : ''}
+      </div>`;
+  }
+
+  // ── ADD GYM ───────────────────────────────────────────────────────────────
+
+  function openAddGymModal() {
+    if (!state.token) { openAuthModal(); return; }
+    document.getElementById('gym-name').value = '';
+    document.getElementById('gym-location').value = '';
+    document.getElementById('gym-description').value = '';
+    showError('add-gym-error', '');
+    document.getElementById('modal-add-gym').classList.add('open');
+  }
+
+  async function handleAddGym() {
+    const name = document.getElementById('gym-name').value.trim();
+    const location = document.getElementById('gym-location').value.trim();
+    const description = document.getElementById('gym-description').value.trim();
+    if (!name || !location) { showError('add-gym-error', 'Name and location are required.'); return; }
+    try {
+      await apiFetch('/gyms', {
+        method: 'POST',
+        body: JSON.stringify({ name, location, description }),
+      });
+      closeModal('modal-add-gym');
+      toast('Gym added!');
+      loadGyms();
+    } catch (e) {
+      showError('add-gym-error', e.message);
+    }
+  }
+
+  // ── ADD REVIEW ────────────────────────────────────────────────────────────
+
+  function openAddReviewModal() {
+    if (!state.token) { openAuthModal(); return; }
+    state.selectedRating = 0;
+    document.getElementById('review-comment').value = '';
+    showError('add-review-error', '');
+    renderStars(0);
+    document.getElementById('modal-add-review').classList.add('open');
+  }
+
+  function setRating(n) {
+    state.selectedRating = n;
+    renderStars(n);
+  }
+
+  function renderStars(n) {
+    document.querySelectorAll('.star-btn').forEach(btn => {
+      btn.classList.toggle('active', parseInt(btn.dataset.value) <= n);
+    });
+  }
+
+  async function handleAddReview() {
+    if (!state.selectedRating) { showError('add-review-error', 'Please select a rating.'); return; }
+    const comment = document.getElementById('review-comment').value.trim();
+    try {
+      await apiFetch(`/gyms/${state.currentGymId}/reviews`, {
+        method: 'POST',
+        body: JSON.stringify({ rating: state.selectedRating, comment }),
+      });
+      closeModal('modal-add-review');
+      toast('Review submitted!');
+      openGym(state.currentGymId);
+    } catch (e) {
+      showError('add-review-error', e.message);
+    }
+  }
+
+  // ── PROFILE ───────────────────────────────────────────────────────────────
+
+  async function loadProfile() {
+    if (!state.token) { showView('gyms'); return; }
+    const container = document.getElementById('profile-content');
+    container.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
+    try {
+      const data = await apiFetch('/profile');
+      const profile = data.profile || data.user || {};
+      const stats = data.stats || {};
+      const gyms = data.gyms || [];
+      const reviews = data.reviews || [];
+
+      const initial = (profile.display_name || profile.email || '?')[0].toUpperCase();
+
+      container.innerHTML = `
+        <div class="profile-header">
+          <div class="avatar">${initial}</div>
+          <div>
+            <div class="profile-name">${escHtml(profile.display_name || profile.email || 'User')}</div>
+            <div class="profile-email">${escHtml(profile.email || '')}</div>
+          </div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-num">${stats.totalGymsCreated ?? gyms.length}</div>
+            <div class="stat-label">Gyms Added</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">${stats.totalReviewsWritten ?? reviews.length}</div>
+            <div class="stat-label">Reviews Written</div>
+          </div>
+        </div>
+
+        <div class="profile-section-title">My Gyms</div>
+        ${gyms.length
+          ? `<div class="gym-grid">${gyms.map(gymCard).join('')}</div>`
+          : `<div class="empty"><div class="empty-icon">&#127947;</div><p>You haven't added any gyms yet.</p></div>`
+        }
+
+        <div class="profile-section-title">My Reviews</div>
+        ${reviews.length
+          ? `<div class="review-list">${reviews.map(profileReviewItem).join('')}</div>`
+          : `<div class="empty"><div class="empty-icon">&#128172;</div><p>You haven't written any reviews yet.</p></div>`
+        }`;
+    } catch (e) {
+      container.innerHTML = `<div class="empty"><p>Failed to load profile: ${e.message}</p></div>`;
+    }
+  }
+
+  function profileReviewItem(r) {
+    return `
+      <div class="review-item">
+        <div class="review-header">
+          <span class="reviewer" style="cursor:pointer;color:var(--accent)" onclick="openGym('${r.gym_id}')">&#127947; ${escHtml(r.gym_name || 'Gym')}</span>
+          <span class="review-date">${formatDate(r.created_at)}</span>
+        </div>
+        <div class="stars">${starsHtml(r.rating)}</div>
+        ${r.comment ? `<div class="review-comment">${escHtml(r.comment)}</div>` : ''}
+      </div>`;
+  }
+
+  // ── HELPERS ───────────────────────────────────────────────────────────────
+
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+  }
+
+  function escHtml(str) {
+    return String(str ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  // close modal on backdrop click
+  document.querySelectorAll('.modal-backdrop').forEach(el => {
+    el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+  });
+
+
+  // ── INIT ──────────────────────────────────────────────────────────────────
+
+  const configReady = fetch(`${API}/config`)
+    .then(r => r.json())
+    .then(cfg => {
+      firebase.initializeApp({
+        apiKey: cfg.firebaseApiKey,
+        authDomain: cfg.firebaseAuthDomain,
+        projectId: cfg.firebaseProjectId,
+      });
+    })
+    .catch(() => {});
+
+  updateNav();
+  loadGyms();
+</script>
+</body>
+</html>
