@@ -4,7 +4,6 @@ jest.mock("../config/firebaseAdmin", () => ({
   auth: () => ({ verifyIdToken: jest.fn() }),
 }));
 
-// Kontrollerar om Authorization-header finns — returnerar annars 401
 jest.mock("../middleware/verifyToken", () => (req, res, next) => {
   if (!req.headers.authorization) {
     return res.status(401).json({ error: "No token provided" });
