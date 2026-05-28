@@ -4,7 +4,11 @@ jest.mock("../config/firebaseAdmin", () => ({
   auth: () => ({ verifyIdToken: jest.fn() }),
 }));
 
+// Kontrollerar om Authorization-header finns — returnerar annars 401
 jest.mock("../middleware/verifyToken", () => (req, res, next) => {
+  if (!req.headers.authorization) {
+    return res.status(401).json({ error: "No token provided" });
+  }
   req.user = { uid: "test-uid", email: "test@test.com" };
   next();
 });
@@ -75,7 +79,15 @@ describe("GET /gyms/:id", () => {
 
 
 describe("POST /gyms", () => {
-  it("skapar ett gym och returnerar 201", async () => {
+  it("POST /gyms without token returns 401", async () => {
+    const res = await request(app)
+      .post("/gyms")
+      .send({ name: "Nytt Gym", location: "Göteborg" });
+
+    expect(res.status).toBe(401);
+  });
+
+  it("POST /gyms with a valid session/token returns 201", async () => {
     db.createGym.mockResolvedValue({ id: VALID_ID, name: "Nytt Gym", location: "Göteborg" });
 
     const res = await request(app)
@@ -150,5 +162,13 @@ describe("POST /gyms/:id/reviews", () => {
       .send({ rating: 3 });
 
     expect(res.status).toBe(400);
+  });
+
+  it("POST /gyms/:id/reviews without a token returns 401", async () => {
+    const res = await request(app)
+      .post(`/gyms/${VALID_ID}/reviews`)
+      .send({ rating: 4 });
+
+    expect(res.status).toBe(401);
   });
 });
