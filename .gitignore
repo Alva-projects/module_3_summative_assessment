@@ -12,6 +12,7 @@ hosting/.cache
 /functions/node_modules/
 /functions/.env
 /functions/package-lock.json
+serviceAccountKey.json
 
 # Firebase Emulators
 /firebase-*.zip
