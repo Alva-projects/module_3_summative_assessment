@@ -1,6 +1,7 @@
-jest.mock("../config/firebaseAdmin", () => ({
-  auth: () => ({ verifyIdToken: jest.fn() }),
-}));
+jest.mock("../config/firebaseAdmin", () => {
+  const mockAuth = { verifyIdToken: jest.fn() };
+  return { auth: () => mockAuth };
+});
 
 const admin = require("../config/firebaseAdmin");
 const verifyToken = require("../middleware/verifyToken");
