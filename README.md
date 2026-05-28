@@ -95,3 +95,7 @@ Testerna använder mockade versioner av databasen och Firebase. Ingen riktig ans
 ## CI/CD
 
 GitHub Actions kör testerna automatiskt vid varje push och pull request. Status syns under fliken **Actions** på GitHub.
+
+## Screenshots
+![Tester](tests.png)
+![Workflow GitHub Actions CI](workflow_CI.png)
